@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚔️ Ares · Stress-Testing Engine</title>
+    <title>⚔️ Ares · War Report Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="importmap">
+        { "imports": { "@xenova/transformers": "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js" } }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
@@ -19,53 +22,212 @@
             --gold: #c8943a;
             --broken: #c04040;
             --kept: #6b8e5a;
+            --iron: #8a7060;
             --font-display: 'Cinzel', serif;
             --font-body: 'Crimson Pro', serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); font-family: var(--font-body); color: var(--text); min-height: 100vh; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        body { 
+            background: var(--bg); 
+            font-family: var(--font-body); 
+            color: var(--text); 
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at 30% 50%, rgba(192,56,42,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 20%, rgba(192,56,42,0.04) 0%, transparent 50%);
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
 
-        .header { text-align: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; }
-        .header h1 { font-family: var(--font-display); font-size: 2.5rem; color: var(--ares); letter-spacing: 4px; }
+        .header { 
+            text-align: center; 
+            margin-bottom: 2rem; 
+            border-bottom: 1px solid var(--border); 
+            padding-bottom: 1.5rem; 
+        }
+        .header h1 { 
+            font-family: var(--font-display); 
+            font-size: 2.5rem; 
+            color: var(--ares); 
+            letter-spacing: 4px; 
+        }
         .header h1 span { color: var(--text); }
-        .header-sub { font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted); letter-spacing: 2px; margin-top: 0.5rem; }
-        .type-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 3px; font-family: var(--font-mono); font-size: 0.55rem; background: rgba(192,56,42,0.15); color: var(--ares); border: 1px solid var(--ares); margin-top: 0.5rem; }
+        .header-sub { 
+            font-family: var(--font-mono); 
+            font-size: 0.6rem; 
+            color: var(--muted); 
+            letter-spacing: 2px; 
+            margin-top: 0.5rem; 
+        }
+        .domain-badge { 
+            display: inline-block; 
+            padding: 0.2rem 0.8rem; 
+            border-radius: 3px; 
+            font-family: var(--font-mono); 
+            font-size: 0.55rem; 
+            background: rgba(192,56,42,0.15); 
+            color: var(--ares); 
+            border: 1px solid var(--ares); 
+            margin-top: 0.5rem;
+            letter-spacing: 1px;
+        }
 
-        .status-bar { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted); }
-        .status-bar span { color: var(--text); }
+        .status-bar { 
+            display: flex; 
+            gap: 2rem; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+            margin-bottom: 2rem; 
+            font-family: var(--font-mono); 
+            font-size: 0.6rem; 
+            color: var(--muted); 
+        }
+        .status-bar span { color: var(--text); font-size: 0.7rem; }
 
-        .controls { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
-        button { font-family: var(--font-mono); font-size: 0.65rem; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--panel); color: var(--text); transition: all 0.2s; letter-spacing: 1px; }
-        button:hover:not(:disabled) { background: var(--ares); color: #fff; border-color: var(--ares); }
-        button.primary { background: var(--ares); color: #fff; border-color: var(--ares); }
-        button.keep-btn { background: rgba(107,142,90,0.15); color: var(--kept); border-color: var(--kept); }
-        button.keep-btn:hover:not(:disabled) { background: var(--kept); color: #000; }
+        .controls { 
+            display: flex; 
+            gap: 0.5rem; 
+            justify-content: center; 
+            margin-bottom: 2rem; 
+            flex-wrap: wrap; 
+        }
+        button { 
+            font-family: var(--font-mono); 
+            font-size: 0.65rem; 
+            padding: 0.55rem 1.1rem; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            border: 1px solid var(--border); 
+            background: var(--panel); 
+            color: var(--text); 
+            transition: all 0.2s; 
+            letter-spacing: 1px; 
+        }
+        button:hover:not(:disabled) { 
+            background: var(--ares); 
+            color: #fff; 
+            border-color: var(--ares); 
+        }
+        button.primary { 
+            background: var(--ares); 
+            color: #fff; 
+            border-color: var(--ares); 
+        }
+        button.dispatch-btn { 
+            background: rgba(107,142,90,0.15); 
+            color: var(--kept); 
+            border-color: var(--kept); 
+        }
+        button.dispatch-btn:hover:not(:disabled) { 
+            background: var(--kept); 
+            color: #000; 
+        }
         button:disabled { opacity: 0.4; cursor: not-allowed; }
         .spin { display: inline-block; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .test-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 0.8rem; margin-bottom: 2rem; }
+        /* War Reports */
+        .reports-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); 
+            gap: 0.8rem; 
+            margin-bottom: 2rem; 
+        }
 
-        .test-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; transition: all 0.2s; border-left: 4px solid var(--ares); }
-        .test-card.broken { border-left-color: var(--broken); opacity: 0.7; }
-        .test-card.kept { border-left-color: var(--kept); }
+        .report-card { 
+            background: var(--panel); 
+            border: 1px solid var(--border); 
+            border-radius: 8px; 
+            padding: 1.2rem; 
+            transition: all 0.25s; 
+            border-left: 4px solid var(--ares);
+        }
+        .report-card.broken { 
+            border-left-color: var(--broken); 
+            opacity: 0.65;
+        }
+        .report-card.kept { 
+            border-left-color: var(--kept); 
+        }
+        .report-card:hover { 
+            border-color: var(--steel); 
+            transform: translateY(-2px); 
+        }
 
-        .test-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
-        .test-pair { font-family: var(--font-body); font-size: 0.85rem; font-style: italic; margin-bottom: 0.5rem; }
-        .test-verdict { font-family: var(--font-display); font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 3px; }
+        .report-head { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            margin-bottom: 0.6rem; 
+        }
+        .report-triplet { 
+            font-family: var(--font-body); 
+            font-size: 0.95rem; 
+            font-style: italic; 
+            line-height: 1.5;
+            margin-bottom: 0.6rem;
+        }
+        .report-verdict { 
+            font-family: var(--font-display); 
+            font-size: 0.65rem; 
+            padding: 0.2rem 0.6rem; 
+            border-radius: 3px; 
+        }
         .verdict-broken { background: rgba(192,64,64,0.2); color: var(--broken); }
         .verdict-kept { background: rgba(107,142,90,0.2); color: var(--kept); }
 
-        .test-results { font-family: var(--font-mono); font-size: 0.52rem; color: var(--muted); margin-bottom: 0.4rem; line-height: 1.4; }
-        .test-actions { display: flex; gap: 0.3rem; }
-        .test-actions button { font-size: 0.5rem; padding: 0.2rem 0.4rem; }
+        .report-tests { 
+            font-family: var(--font-mono); 
+            font-size: 0.5rem; 
+            color: var(--muted); 
+            margin-bottom: 0.4rem; 
+            line-height: 1.5; 
+        }
+        .report-tests .pass { color: var(--kept); }
+        .report-tests .fail { color: var(--broken); }
 
-        .log { background: #0d0808; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem; max-height: 150px; overflow-y: auto; font-family: var(--font-mono); font-size: 0.52rem; color: var(--muted); }
-        .log-entry { padding: 0.1rem 0; }
+        .report-scores {
+            display: flex;
+            gap: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.5rem;
+            color: var(--muted);
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .report-stress {
+            margin-left: auto;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            color: var(--ares);
+        }
 
-        @media (max-width: 768px) { .test-grid { grid-template-columns: 1fr; } }
+        .log { 
+            background: #0d0808; 
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            padding: 0.6rem; 
+            max-height: 150px; 
+            overflow-y: auto; 
+            font-family: var(--font-mono); 
+            font-size: 0.52rem; 
+            color: var(--muted); 
+        }
+        .log-entry { padding: 0.12rem 0; }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) { 
+            .reports-grid { grid-template-columns: 1fr; } 
+        }
     </style>
 </head>
 <body>
@@ -73,26 +235,27 @@
 
     <div class="header">
         <h1>⚔️ A<span>RES</span></h1>
-        <div class="header-sub">STRESS-TESTING ENGINE · PYTHAGOREAN #3 · THE TRIAD</div>
-        <div class="type-badge">OLYMPIAN</div>
+        <div class="header-sub">WAR REPORT ENGINE · PYTHAGOREAN #3 · THE TRIAD</div>
+        <div class="domain-badge">DOMAIN: WAR · CONFLICT · STRIFE</div>
     </div>
 
     <div class="status-bar" id="statusBar">
-        <div>Pairs loaded: <span id="loadedCount">—</span></div>
+        <div>War tokens: <span id="tokenCount">—</span></div>
         <div>Tested: <span id="testedCount">—</span></div>
         <div>Broken: <span id="brokenCount">—</span></div>
         <div>Kept: <span id="keptCount">—</span></div>
     </div>
 
     <div class="controls">
-        <button id="fetchBtn" class="primary">📥 Fetch Pairs from Aphrodite</button>
-        <button id="testAllBtn" disabled>⚔️ Stress Test All</button>
-        <button id="dispatchBtn" class="keep-btn" disabled>📤 Dispatch Kept → Apollo</button>
+        <button id="fetchBtn" class="primary">⚔️ Fetch War Tokens from Hermes</button>
+        <button id="testBtn" disabled>⚔️ Stress Test All</button>
+        <button id="dispatchBtn" class="dispatch-btn" disabled>📤 Send War Reports to Apollo</button>
     </div>
 
-    <div class="test-grid" id="testGrid">
-        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-style:italic;">
-            Fetch pairs from Aphrodite, then break what is weak. Keep what survives.
+    <div class="reports-grid" id="reportsGrid">
+        <div class="empty-state">
+            Fetch war tokens from Hermes.<br>
+            Ares will find the conflict and test what survives.
         </div>
     </div>
 
@@ -101,218 +264,308 @@
 </div>
 
 <script type="module">
+// ════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════
 const KAIROS_URL = 'https://kzcucjcyxybypncbdbws.supabase.co';
 const KAIROS_KEY = 'sb_publishable_saeUHGocDah-T2_709M6Fg_g26JtLXw';
 const sb = window.supabase.createClient(KAIROS_URL, KAIROS_KEY);
 
-let pairs = [];
-let testResults = [];
+let warItems = [];
+let warReports = [];
 
+// ════════════════════════════════════════════════
+// ARES'S DOMAIN — WAR WORDS
+// ════════════════════════════════════════════════
+const WAR_WORDS = new Set([
+    'war','battle','fight','conflict','destruction','attack','defense','army',
+    'soldier','weapon','sword','spear','shield','armor','fortress','castle',
+    'siege','invasion','conquest','victory','defeat','slaughter','carnage',
+    'blood','death','kill','destroy','shatter','break','crush','burn','rage',
+    'fury','wrath','violence','force','power','domination','rival','enemy',
+    'opponent','competition','strife','discord','chaos','ares','mars','spartan',
+    'combat','assault','strike','clash','collision','explosion','demolish',
+    'conquer','vanquish','annihilate','obliterate','massacre','bombard',
+    'reinforcement','counterattack','ambush','barrage','onslaught','crusade'
+]);
+
+const WAR_VERBS = new Set([
+    'destroys','shatters','breaks','crushes','burns','kills','attacks','defends',
+    'invades','conquers','defeats','slaughter','massacres','bombards','assaults',
+    'strikes','clashes','collides','explodes','demolishes','annihilates',
+    'rages','fights','battles','storms','besieges','overruns','devastates',
+    'ravages','plunders','pillages','raids','ambushes','counterattacks'
+]);
+
+const WAR_SUBJECTS = new Set([
+    'army','soldier','warrior','enemy','rival','opponent','invader','conqueror',
+    'general','commander','legion','battalion','horde','militia','mercenary',
+    'gladiator','champion','berserker','spartan','ares','mars'
+]);
+
+const WAR_OBJECTS = new Set([
+    'fortress','castle','wall','defense','shield','armor','weapon','sword',
+    'spear','territory','land','kingdom','empire','city','gate','bridge',
+    'formation','line','front','position','stronghold','citadel'
+]);
+
+function isWarToken(word) {
+    const w = word.toLowerCase();
+    if (WAR_WORDS.has(w)) return true;
+    if (WAR_VERBS.has(w)) return true;
+    if (WAR_SUBJECTS.has(w)) return true;
+    if (WAR_OBJECTS.has(w)) return true;
+    if (w.includes('war') || w.includes('fight') || w.includes('batt') || w.includes('destro')) return true;
+    if (w.includes('conq') || w.includes('strik') || w.includes('clash') || w.includes('violen')) return true;
+    return false;
+}
+
+// ════════════════════════════════════════════════
+// LOGGING
+// ════════════════════════════════════════════════
 function log(msg) {
     const el = document.getElementById('log');
     el.innerHTML = `<div class="log-entry">[${new Date().toLocaleTimeString()}] ${msg}</div>` + el.innerHTML;
     while (el.children.length > 30) el.removeChild(el.lastChild);
 }
 
-// Ares tests:
-// 1. Coherence: do these items actually relate? (semantic check)
-// 2. Survival: if this pair went through Apollo, would it produce something useful?
-// 3. Resistance: can the pair survive a random perturbation?
-// 4. Conflict: is there productive tension, or just noise?
-
-function stressTest(pair) {
-    const tests = [];
-
-    // Test 1: Score check — pairs below 40 attraction are noise
-    const attraction = pair.attraction_score || 50;
-    tests.push({
-        name: 'Attraction Threshold',
-        passed: attraction >= 35,
-        detail: `Attraction ${attraction}/100 — ${attraction >= 35 ? 'PASSES' : 'FAILS'} minimum 35`
-    });
-
-    // Test 2: Tension check — pairs need productive tension (30-75)
-    const tension = pair.tension_score || 50;
-    tests.push({
-        name: 'Productive Tension',
-        passed: tension >= 25 && tension <= 80,
-        detail: `Tension ${tension}/100 — ${tension >= 25 && tension <= 80 ? 'IN RANGE' : 'OUT OF RANGE'} 25-80`
-    });
-
-    // Test 3: Length balance — are both items substantive?
-    const lenA = (pair.item_a_text || '').length;
-    const lenB = (pair.item_b_text || '').length;
-    tests.push({
-        name: 'Substance Balance',
-        passed: lenA >= 2 && lenB >= 2 && Math.abs(lenA - lenB) < 50,
-        detail: `Length A:${lenA} B:${lenB} — ${lenA >= 2 && lenB >= 2 ? 'BOTH SUBSTANTIVE' : 'ONE EMPTY'}`
-    });
-
-    // Test 4: No self-pairing
-    const same = pair.item_a_text === pair.item_b_text;
-    tests.push({
-        name: 'Non-Narcissus',
-        passed: !same,
-        detail: same ? 'SELF-PAIR — narcissus rejection' : 'Distinct items — passes'
-    });
-
-    // Test 5: Random survival — flip a weighted coin based on desire score
-    const desire = pair.desire_score || 50;
-    const survivalRoll = Math.random() * 100;
-    tests.push({
-        name: 'Chaos Resistance',
-        passed: survivalRoll < desire,
-        detail: `Roll ${Math.round(survivalRoll)} vs Desire ${desire} — ${survivalRoll < desire ? 'SURVIVES' : 'BREAKS'}`
-    });
-
-    const passedCount = tests.filter(t => t.passed).length;
-    const allPassed = passedCount === tests.length;
-    const mostlyPassed = passedCount >= 3;
-
-    return {
-        tests,
-        passedCount,
-        totalTests: tests.length,
-        verdict: allPassed ? 'kept' : mostlyPassed ? 'kept' : 'broken',
-        survived: allPassed || mostlyPassed
-    };
-}
-
-async function fetchPairs() {
-    log('Fetching pairs from Aphrodite...');
+// ════════════════════════════════════════════════
+// FETCH — WAR FILTERED
+// ════════════════════════════════════════════════
+async function fetchAll() {
+    log('Fetching tokens from Hermes — keeping only war...');
     document.getElementById('fetchBtn').disabled = true;
     document.getElementById('fetchBtn').innerHTML = '<span class="spin">⟳</span> Fetching...';
-    pairs = [];
-    testResults = [];
+    warItems = [];
+    warReports = [];
 
     try {
-        const { data } = await sb.from('aphrodite_pairs').select('*').eq('state', 'raw').order('desire_score', { ascending: false }).limit(20);
-        pairs = data || [];
-        document.getElementById('loadedCount').textContent = pairs.length;
-        document.getElementById('testAllBtn').disabled = pairs.length === 0;
-        renderPairs();
-        log(`✓ Loaded ${pairs.length} raw pairs from Aphrodite`);
+        const { data: allTokens } = await sb.from('concepts')
+            .select('*')
+            .eq('state', 'raw')
+            .eq('band', 'hermes')
+            .order('created_at', { ascending: false })
+            .limit(60);
+
+        const totalTokens = (allTokens || []).length;
+        
+        const warTokens = (allTokens || []).filter(t => {
+            const word = (t.body || t.word || '').toLowerCase();
+            return isWarToken(word);
+        });
+
+        const { data: allTriplets } = await sb.from('svo_triplets')
+            .select('*')
+            .eq('state', 'raw')
+            .order('created_at', { ascending: false })
+            .limit(30);
+
+        const warTriplets = (allTriplets || []).filter(t => {
+            const s = (t.subject || '').toLowerCase();
+            const v = (t.verb || '').toLowerCase();
+            const o = (t.object || '').toLowerCase();
+            return isWarToken(s) || isWarToken(v) || isWarToken(o);
+        });
+
+        warItems = [
+            ...warTokens.map(t => ({ 
+                type: 'token', id: t.id, 
+                text: t.body || t.word || '',
+                score: t.score || 50,
+                embedding: null 
+            })),
+            ...warTriplets.map(t => ({
+                type: 'svo_triplet', id: t.id,
+                text: `${t.subject || ''} ${t.verb || ''} ${t.object || ''}`.trim(),
+                subject: t.subject, verb: t.verb, object: t.object,
+                score: t.cultivation_score || 50,
+                embedding: null
+            }))
+        ];
+
+        document.getElementById('tokenCount').textContent = warTokens.length;
+        document.getElementById('testBtn').disabled = warItems.length === 0;
+        
+        const released = totalTokens - warTokens.length;
+        log(`⚔️ ${warTokens.length} war tokens kept · ${released} non-war tokens released · ${warTriplets.length} war triplets found`);
+
     } catch (err) {
         log(`Fetch error: ${err.message}`);
     }
 
     document.getElementById('fetchBtn').disabled = false;
-    document.getElementById('fetchBtn').textContent = '📥 Fetch Pairs from Aphrodite';
+    document.getElementById('fetchBtn').textContent = '⚔️ Fetch War Tokens from Hermes';
 }
 
+// ════════════════════════════════════════════════
+// STRESS TEST ENGINE
+// ════════════════════════════════════════════════
+function stressTest(item) {
+    const text = item.text || '';
+    const score = item.score || 50;
+    const tests = [];
+
+    // Test 1: Substinence — is there enough material?
+    const wordCount = text.split(/\s+/).length;
+    tests.push({
+        name: 'Substance',
+        passed: wordCount >= 2 && text.length >= 5,
+        detail: `${wordCount} words — ${wordCount >= 2 && text.length >= 5 ? 'SUFFICIENT' : 'TOO THIN'}`
+    });
+
+    // Test 2: War relevance — does it actually contain war language?
+    const warSignal = isWarToken(text) || 
+        WAR_WORDS.has(text.toLowerCase()) ||
+        [...WAR_VERBS].some(v => text.toLowerCase().includes(v));
+    tests.push({
+        name: 'War Signal',
+        passed: warSignal,
+        detail: warSignal ? 'War domain confirmed' : 'No war signal detected'
+    });
+
+    // Test 3: Score threshold — below 30 is noise
+    tests.push({
+        name: 'Score Threshold',
+        passed: score >= 30,
+        detail: `Score ${score}/100 — ${score >= 30 ? 'PASSES' : 'FAILS'} minimum 30`
+    });
+
+    // Test 4: Length — not too long, not too short
+    tests.push({
+        name: 'Length Check',
+        passed: wordCount >= 1 && wordCount <= 8,
+        detail: `${wordCount} words — ${wordCount >= 1 && wordCount <= 8 ? 'IN RANGE' : 'OUT OF RANGE'} 1-8`
+    });
+
+    // Test 5: Chaos Resistance — weighted coin flip based on score
+    const survivalRoll = Math.random() * 100;
+    tests.push({
+        name: 'Chaos Resistance',
+        passed: survivalRoll < score,
+        detail: `Roll ${Math.round(survivalRoll)} vs Score ${score} — ${survivalRoll < score ? 'SURVIVES' : 'BREAKS'}`
+    });
+
+    const passedCount = tests.filter(t => t.passed).length;
+    const survived = passedCount >= 3;
+
+    return {
+        ...item,
+        tests,
+        passedCount,
+        totalTests: tests.length,
+        survived,
+        verdict: survived ? 'kept' : 'broken',
+        stressScore: Math.round((passedCount / tests.length) * 100)
+    };
+}
+
+// ════════════════════════════════════════════════
+// TEST ALL
+// ════════════════════════════════════════════════
 async function testAll() {
-    if (!pairs.length) return;
-    log(`Stress-testing ${pairs.length} pairs...`);
-    document.getElementById('testAllBtn').disabled = true;
-    document.getElementById('testAllBtn').innerHTML = '<span class="spin">⟳</span> Testing...';
-    testResults = [];
+    if (!warItems.length) return;
+    log(`Stress-testing ${warItems.length} war items...`);
+    document.getElementById('testBtn').disabled = true;
+    document.getElementById('testBtn').innerHTML = '<span class="spin">⟳</span> Testing...';
+    warReports = [];
 
-    for (const pair of pairs) {
-        const result = stressTest(pair);
-        testResults.push({ ...pair, result });
-
-        // Update pair state in database
-        await sb.from('aphrodite_pairs').update({
-            state: result.verdict,
-            metadata: { tests: result.tests, verdict: result.verdict, tested_at: new Date().toISOString() }
-        }).eq('id', pair.id);
+    for (const item of warItems) {
+        const report = stressTest(item);
+        warReports.push(report);
     }
 
-    const broken = testResults.filter(r => !r.result.survived).length;
-    const kept = testResults.filter(r => r.result.survived).length;
+    // Sort by survived first, then stress score
+    warReports.sort((a, b) => {
+        if (a.survived && !b.survived) return -1;
+        if (!a.survived && b.survived) return 1;
+        return b.stressScore - a.stressScore;
+    });
 
-    document.getElementById('testedCount').textContent = testResults.length;
+    const kept = warReports.filter(r => r.survived).length;
+    const broken = warReports.filter(r => !r.survived).length;
+
+    document.getElementById('testedCount').textContent = warReports.length;
     document.getElementById('brokenCount').textContent = broken;
     document.getElementById('keptCount').textContent = kept;
     document.getElementById('dispatchBtn').disabled = kept === 0;
 
-    renderResults();
-    log(`⚔️ Testing complete: ${broken} broken, ${kept} kept`);
-    document.getElementById('testAllBtn').disabled = false;
-    document.getElementById('testAllBtn').textContent = '⚔️ Stress Test All';
+    renderReports();
+    log(`⚔️ Testing complete: ${broken} broken, ${kept} kept for Apollo`);
+    document.getElementById('testBtn').disabled = false;
+    document.getElementById('testBtn').textContent = '⚔️ Stress Test All';
 }
 
-function renderPairs() {
-    const grid = document.getElementById('testGrid');
-    if (!pairs.length && !testResults.length) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--muted);font-style:italic;">No pairs loaded. Fetch from Aphrodite.</div>';
+// ════════════════════════════════════════════════
+// RENDER WAR REPORTS
+// ════════════════════════════════════════════════
+function renderReports() {
+    const grid = document.getElementById('reportsGrid');
+    if (!warReports.length) {
+        grid.innerHTML = '<div class="empty-state">No war reports yet. Fetch and test.</div>';
         return;
     }
-    if (!testResults.length) {
-        grid.innerHTML = pairs.map(p => `
-            <div class="test-card">
-                <div class="test-head">
-                    <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--muted);">${p.pair_type}</span>
-                    <span style="color:var(--gold);font            grid.innerHTML = pairs.map(p => `
-                <div class="test-card">
-                    <div class="test-head">
-                        <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--muted);">${p.pair_type}</span>
-                        <span style="color:var(--gold);font-family:var(--font-display);font-size:0.65rem;">desire ${p.desire_score}</span>
-                    </div>
-                    <div class="test-pair">${esc(p.item_a_text)} + ${esc(p.item_b_text)}</div>
-                    <div class="test-results">Awaiting stress test...</div>
-                </div>
-            `).join('');
-    }
-}
-
-function renderResults() {
-    const grid = document.getElementById('testGrid');
-    grid.innerHTML = testResults.map((p, i) => {
-        const r = p.result;
-        return `
-            <div class="test-card ${r.verdict}">
-                <div class="test-head">
-                    <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--muted);">${p.pair_type}</span>
-                    <span class="test-verdict ${r.survived ? 'verdict-kept' : 'verdict-broken'}">${r.survived ? 'KEPT' : 'BROKEN'}</span>
-                </div>
-                <div class="test-pair">${esc(p.item_a_text)} + ${esc(p.item_b_text)}</div>
-                <div class="test-results">
-                    ${r.tests.map(t => `• ${t.name}: ${t.passed ? '✓' : '✗'} ${t.detail}`).join('<br>')}
-                </div>
-                <div style="font-family:var(--font-mono);font-size:0.5rem;color:var(--muted);margin-top:0.3rem;">
-                    ${r.passedCount}/${r.totalTests} tests passed
-                </div>
+    grid.innerHTML = warReports.map(r => `
+        <div class="report-card ${r.verdict}">
+            <div class="report-head">
+                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--muted);">${r.type}</span>
+                <span class="report-verdict ${r.survived ? 'verdict-kept' : 'verdict-broken'}">${r.survived ? 'KEPT' : 'BROKEN'}</span>
             </div>
-        `;
-    }).join('');
+            <div class="report-triplet">${esc(r.text)}</div>
+            <div class="report-tests">
+                ${r.tests.map(t => `${t.passed ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'} ${t.name}: ${t.detail}`).join('<br>')}
+            </div>
+            <div class="report-scores">
+                <span>${r.passedCount}/${r.totalTests} passed</span>
+                <span class="report-stress">${r.stressScore}</span>
+            </div>
+        </div>
+    `).join('');
 }
 
-async function dispatchKept() {
-    const kept = testResults.filter(r => r.result.survived);
+// ════════════════════════════════════════════════
+// DISPATCH TO APOLLO
+// ════════════════════════════════════════════════
+async function dispatchToApollo() {
+    const kept = warReports.filter(r => r.survived);
     if (!kept.length) return;
 
-    log(`Dispatching ${kept.length} kept pairs to Apollo...`);
-    let dispatched = 0;
+    log('📤 Sending war reports to Apollo...');
+    document.getElementById('dispatchBtn').disabled = true;
+    document.getElementById('dispatchBtn').textContent = '📤 Sending...';
 
-    for (const p of kept) {
-        // Write to ares_approved table for Apollo to consume
-        const { error } = await sb.from('ares_approved').insert({
-            pair_id: p.id,
-            item_a_text: p.item_a_text,
-            item_b_text: p.item_b_text,
-            pair_type: p.pair_type,
-            desire_score: p.desire_score,
-            tests_passed: p.result.passedCount,
-            state: 'kept',
-            dispatched_at: new Date().toISOString()
+    let dispatched = 0;
+    for (const report of kept) {
+        const { error } = await sb.from('ares_dispatch').insert({
+            triplet: report.text,
+            stress_score: report.stressScore,
+            tests_passed: report.passedCount,
+            tests_total: report.totalTests,
+            test_results: report.tests,
+            item_type: report.type,
+            consumed: false,
+            created_at: new Date().toISOString()
         });
         if (!error) dispatched++;
     }
 
-    log(`✓ Dispatched ${dispatched} pairs to ares_approved — Apollo may now synthesize`);
+    log(`⚔️ ${dispatched} war reports sent to ares_dispatch — Apollo may now read them`);
+    document.getElementById('dispatchBtn').disabled = false;
+    document.getElementById('dispatchBtn').textContent = '📤 Send War Reports to Apollo';
 }
 
+// ════════════════════════════════════════════════
+// SELF-ARCHIVE
+// ════════════════════════════════════════════════
 async function archiveSelf() {
     const html = document.documentElement.outerHTML;
     await sb.from('html').upsert({
         filename: 'ares.html',
-        title: '⚔️ Ares · Stress-Testing Engine',
+        title: '⚔️ Ares · War Report Engine',
         type: 'olympian',
         content: html,
-        description: 'Stress-tests Aphrodite pairs. Breaks what is weak. Keeps what survives. Feeds Apollo.',
-        reads_from: ['aphrodite_pairs'],
-        writes_to: ['ares_approved', 'aphrodite_pairs'],
+        description: 'Filters Hermes tokens for war domain, stress-tests, dispatches surviving reports to Apollo',
+        reads_from: ['concepts', 'svo_triplets'],
+        writes_to: ['ares_dispatch'],
         models_used: [],
         url: window.location.href,
         updated_at: new Date().toISOString()
@@ -321,12 +574,15 @@ async function archiveSelf() {
 
 function esc(s) { return String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]); }
 
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
 function init() {
-    document.getElementById('fetchBtn').addEventListener('click', fetchPairs);
-    document.getElementById('testAllBtn').addEventListener('click', testAll);
-    document.getElementById('dispatchBtn').addEventListener('click', dispatchKept);
+    document.getElementById('fetchBtn').addEventListener('click', fetchAll);
+    document.getElementById('testBtn').addEventListener('click', testAll);
+    document.getElementById('dispatchBtn').addEventListener('click', dispatchToApollo);
     setTimeout(archiveSelf, 3000);
-    log('⚔️ Ares initialized — Pythagorean #3, the Triad');
+    log('⚔️ Ares — Pythagorean #3, the Triad. He knows what war looks like.');
 }
 init();
 </script>
