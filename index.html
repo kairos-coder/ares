@@ -3,95 +3,520 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚔️ Ares · War Report Engine</title>
+    <title>ARES · The Verb Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&family=JetBrains+Mono:wght@300;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
         :root {
-            --bg: #1a1010; --panel: #241818; --border: #3a2020;
-            --text: #e0d0d0; --muted: #9a6a6a; --ares: #c0382a;
-            --steel: #b05040; --gold: #c8943a; --broken: #c04040; --kept: #6b8e5a;
-            --font-display: 'Cinzel', serif; --font-body: 'Crimson Pro', serif; --font-mono: 'JetBrains Mono', monospace;
+            --obsidian: #0f0b0b;
+            --forge:    #1a1010;
+            --iron:     #221414;
+            --blood:    #2e1010;
+            --border:   #3a1a1a;
+            --ares:     #c0382a;
+            --ares-bright: #e04030;
+            --steel:    #b06050;
+            --ember:    #c8603a;
+            --gold:     #c8943a;
+            --kept:     #6b8e5a;
+            --broken:   #8e3a3a;
+            --ivory:    #e8d8d0;
+            --muted:    #786060;
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Crimson Pro', serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: var(--bg); font-family: var(--font-body); color: var(--text); min-height: 100vh; }
-        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
 
-        .header { text-align: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.2rem; }
-        .header h1 { font-family: var(--font-display); font-size: 2.2rem; color: var(--ares); letter-spacing: 3px; }
-        .header h1 span { color: var(--text); }
-        .header-sub { font-family: var(--font-mono); font-size: 0.55rem; color: var(--muted); letter-spacing: 2px; margin-top: 0.3rem; }
+        body {
+            background: var(--obsidian);
+            font-family: var(--font-body);
+            color: var(--ivory);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-        .status-bar { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: 0.55rem; color: var(--muted); }
-        .status-bar span { color: var(--text); font-size: 0.65rem; }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 50% 35% at 50% 0%, rgba(192,56,42,0.12) 0%, transparent 70%),
+                radial-gradient(ellipse 30% 50% at 90% 80%, rgba(200,96,58,0.06) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-        .controls { display: flex; gap: 0.4rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
-        button { font-family: var(--font-mono); font-size: 0.6rem; padding: 0.45rem 0.9rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); background: var(--panel); color: var(--text); transition: all 0.2s; letter-spacing: 1px; }
-        button:hover:not(:disabled) { background: var(--ares); color: #fff; border-color: var(--ares); }
-        button.primary { background: var(--ares); color: #fff; border-color: var(--ares); }
-        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--ares), var(--ember), var(--ares), transparent);
+            z-index: 100;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 3rem 4rem;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.8rem;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 15%; right: 15%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--ares), var(--ember), var(--ares), transparent);
+        }
+
+        .header-name {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: var(--ares-bright);
+            text-shadow: 0 0 40px rgba(192,56,42,0.5), 0 0 80px rgba(192,56,42,0.2);
+            animation: forgeGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes forgeGlow {
+            from { text-shadow: 0 0 30px rgba(192,56,42,0.4), 0 0 60px rgba(192,56,42,0.15); }
+            to   { text-shadow: 0 0 60px rgba(192,56,42,0.7), 0 0 120px rgba(192,56,42,0.3), 0 0 200px rgba(192,56,42,0.1); }
+        }
+
+        .header-sub {
+            font-family: var(--font-body);
+            font-style: italic;
+            font-size: 0.95rem;
+            color: var(--ember);
+            letter-spacing: 3px;
+            margin-top: 0.3rem;
+            opacity: 0.8;
+        }
+
+        .header-epithet {
+            font-family: var(--font-mono);
+            font-size: 0.45rem;
+            color: var(--muted);
+            letter-spacing: 3px;
+            margin-top: 0.5rem;
+        }
+
+        /* ── STAT BAR ── */
+        .stat-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+            border-top: 1px solid rgba(58,26,26,0.5);
+            border-bottom: 1px solid rgba(58,26,26,0.5);
+            flex-wrap: wrap;
+        }
+
+        .stat { text-align: center; }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            color: var(--ares-bright);
+            display: block;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-family: var(--font-mono);
+            font-size: 0.42rem;
+            color: var(--muted);
+            letter-spacing: 2px;
+            display: block;
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+        }
+
+        /* ── VERB FIELD PANEL ── */
+        .verb-field {
+            background: linear-gradient(135deg, var(--forge), var(--iron));
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 1rem 1.4rem;
+            margin-bottom: 1.8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verb-field::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--ares), transparent);
+        }
+
+        .verb-field-title {
+            font-family: var(--font-mono);
+            font-size: 0.45rem;
+            letter-spacing: 3px;
+            color: var(--muted);
+            margin-bottom: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .verb-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+
+        .verb-chip {
+            font-family: var(--font-mono);
+            font-size: 0.48rem;
+            padding: 0.12rem 0.5rem;
+            border-radius: 1px;
+            border: 1px solid;
+            letter-spacing: 1px;
+        }
+
+        .verb-chip.destructive  { background: rgba(192,56,42,0.12); color: #e08070; border-color: rgba(192,56,42,0.3); }
+        .verb-chip.constructive { background: rgba(107,142,90,0.1);  color: #90b878; border-color: rgba(107,142,90,0.25); }
+        .verb-chip.transformative { background: rgba(200,148,58,0.1); color: #d4a860; border-color: rgba(200,148,58,0.25); }
+        .verb-chip.perceptive   { background: rgba(80,120,160,0.1);  color: #88aac8; border-color: rgba(80,120,160,0.25); }
+        .verb-chip.recursive    { background: rgba(140,80,160,0.1);  color: #b890c8; border-color: rgba(140,80,160,0.25); }
+        .verb-chip.spiritual    { background: rgba(160,130,80,0.1);  color: #c8b070; border-color: rgba(160,130,80,0.25); }
+
+        /* ── CONTROLS ── */
+        .controls {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 0.7rem 1.6rem;
+            border-radius: 1px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--forge);
+            color: var(--muted);
+            transition: all 0.25s;
+        }
+
+        .btn:hover:not(:disabled) {
+            border-color: var(--ares);
+            color: var(--ivory);
+            box-shadow: 0 0 16px rgba(192,56,42,0.2);
+        }
+
+        .btn.primary {
+            border-color: var(--ares);
+            background: linear-gradient(135deg, var(--blood), var(--iron));
+            color: var(--steel);
+        }
+
+        .btn.primary:hover:not(:disabled) {
+            color: var(--ivory);
+            box-shadow: 0 0 24px rgba(192,56,42,0.3);
+        }
+
+        .btn.gold {
+            border-color: rgba(200,148,58,0.4);
+            color: var(--gold);
+        }
+
+        .btn.gold:hover:not(:disabled) {
+            border-color: var(--gold);
+            box-shadow: 0 0 16px rgba(200,148,58,0.15);
+        }
+
+        .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
         .spin { display: inline-block; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .vocab-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; margin-bottom: 1.5rem; }
-        .vocab-title { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 2px; color: var(--muted); margin-bottom: 0.5rem; }
-        .vocab-cloud { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-        .vocab-chip { font-family: var(--font-mono); font-size: 0.5rem; padding: 0.12rem 0.35rem; border-radius: 3px; background: rgba(192,56,42,0.1); color: #d08070; border: 1px solid rgba(192,56,42,0.2); }
+        /* ── DIVIDER ── */
+        .divider {
+            text-align: center;
+            margin: 1.2rem 0;
+            color: var(--ares);
+            font-family: var(--font-display);
+            font-size: 0.7rem;
+            letter-spacing: 8px;
+            opacity: 0.4;
+        }
 
-        .reports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 0.8rem; margin-bottom: 1.5rem; }
-        .report-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem; border-left: 4px solid var(--ares); transition: all 0.2s; }
-        .report-card.broken { border-left-color: var(--broken); opacity: 0.6; }
-        .report-card.kept { border-left-color: var(--kept); }
-        .report-card:hover { border-color: var(--steel); transform: translateY(-1px); }
+        /* ── TRIPLET GRID ── */
+        .grid-title {
+            font-family: var(--font-body);
+            font-style: italic;
+            font-size: 1rem;
+            color: var(--ember);
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            text-align: center;
+            opacity: 0.7;
+        }
 
-        .report-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
-        .report-triplet { font-family: var(--font-body); font-size: 0.85rem; font-style: italic; line-height: 1.4; margin-bottom: 0.5rem; }
-        .report-verdict { font-family: var(--font-display); font-size: 0.6rem; padding: 0.15rem 0.5rem; border-radius: 3px; }
-        .verdict-kept { background: rgba(107,142,90,0.2); color: var(--kept); }
-        .verdict-broken { background: rgba(192,64,64,0.2); color: var(--broken); }
+        .triplets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
 
-        .report-tests { font-family: var(--font-mono); font-size: 0.48rem; color: var(--muted); line-height: 1.4; margin-bottom: 0.4rem; }
-        .report-tests .pass { color: var(--kept); }
-        .report-tests .fail { color: var(--broken); }
-        .report-stress { font-family: var(--font-display); font-size: 1rem; color: var(--ares); }
+        .triplet-card {
+            background: linear-gradient(160deg, var(--forge), var(--iron));
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 1.2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s;
+            animation: cardRise 0.35s ease both;
+        }
 
-        .log { background: #0d0808; border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem; max-height: 120px; overflow-y: auto; font-family: var(--font-mono); font-size: 0.5rem; color: var(--muted); }
-        .empty-state { grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--muted); font-style: italic; }
+        @keyframes cardRise {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-        @media (max-width: 768px) { .reports-grid { grid-template-columns: 1fr; } }
+        .triplet-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .triplet-card.destructive::before  { background: linear-gradient(90deg, var(--ares), var(--ares-bright), var(--ares)); }
+        .triplet-card.constructive::before { background: linear-gradient(90deg, #4a6e3a, #6b8e5a, #4a6e3a); }
+        .triplet-card.transformative::before { background: linear-gradient(90deg, var(--ember), var(--gold), var(--ember)); }
+        .triplet-card.perceptive::before   { background: linear-gradient(90deg, #305080, #5080a0, #305080); }
+        .triplet-card.recursive::before    { background: linear-gradient(90deg, #502870, #8050a0, #502870); }
+        .triplet-card.spiritual::before    { background: linear-gradient(90deg, #806030, #a08050, #806030); }
+
+        .triplet-card:hover {
+            border-color: var(--ares);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(192,56,42,0.12);
+        }
+
+        .triplet-svo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .svo-subject {
+            font-family: var(--font-body);
+            font-style: italic;
+            font-size: 1.1rem;
+            color: var(--ivory);
+        }
+
+        .svo-verb {
+            font-family: var(--font-display);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: var(--ares-bright);
+            padding: 0.1rem 0.4rem;
+            border: 1px solid rgba(192,56,42,0.3);
+            background: rgba(192,56,42,0.08);
+        }
+
+        .svo-object {
+            font-family: var(--font-body);
+            font-style: italic;
+            font-size: 1.1rem;
+            color: var(--steel);
+        }
+
+        .triplet-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.6rem;
+            padding-top: 0.6rem;
+            border-top: 1px solid rgba(58,26,26,0.5);
+            align-items: center;
+        }
+
+        .meta-badge {
+            font-family: var(--font-mono);
+            font-size: 0.4rem;
+            letter-spacing: 1px;
+            padding: 0.1rem 0.4rem;
+            border-radius: 1px;
+            text-transform: uppercase;
+        }
+
+        .meta-badge.destructive  { background: rgba(192,56,42,0.15); color: #e08070; border: 1px solid rgba(192,56,42,0.3); }
+        .meta-badge.constructive { background: rgba(107,142,90,0.12); color: #90b878; border: 1px solid rgba(107,142,90,0.3); }
+        .meta-badge.transformative { background: rgba(200,148,58,0.12); color: #d4a860; border: 1px solid rgba(200,148,58,0.3); }
+        .meta-badge.perceptive   { background: rgba(80,120,160,0.12); color: #88aac8; border: 1px solid rgba(80,120,160,0.3); }
+        .meta-badge.recursive    { background: rgba(140,80,160,0.12); color: #b890c8; border: 1px solid rgba(140,80,160,0.3); }
+        .meta-badge.spiritual    { background: rgba(160,130,80,0.12); color: #c8b070; border: 1px solid rgba(160,130,80,0.3); }
+
+        .meta-scores {
+            margin-left: auto;
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .meta-score-item {
+            text-align: center;
+        }
+
+        .meta-score-value {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            display: block;
+            line-height: 1;
+        }
+
+        .meta-score-label {
+            font-family: var(--font-mono);
+            font-size: 0.35rem;
+            color: var(--muted);
+            display: block;
+            margin-top: 0.15rem;
+            letter-spacing: 1px;
+        }
+
+        .counter-tag {
+            font-family: var(--font-mono);
+            font-size: 0.38rem;
+            color: var(--gold);
+            letter-spacing: 1px;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+
+        .empty-glyph {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--ares);
+            display: block;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .empty-state p {
+            font-style: italic;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        /* ── LOG ── */
+        .war-log {
+            background: rgba(10,6,6,0.9);
+            border: 1px solid rgba(58,26,26,0.4);
+            border-radius: 2px;
+            padding: 0.7rem;
+            max-height: 130px;
+            overflow-y: auto;
+            font-family: var(--font-mono);
+            font-size: 0.48rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .war-log::-webkit-scrollbar { width: 3px; }
+        .war-log::-webkit-scrollbar-thumb { background: var(--ares); border-radius: 1px; }
+
+        .log-line.success { color: #90b878; }
+        .log-line.warn    { color: var(--gold); }
+        .log-line.err     { color: #e07070; }
+
+        @media (max-width: 700px) {
+            .container { padding: 2rem 1.5rem; }
+            .triplets-grid { grid-template-columns: 1fr; }
+            .stat-bar { gap: 1.5rem; }
+        }
     </style>
 </head>
 <body>
 <div class="container">
 
-    <div class="header">
-        <h1>⚔️ A<span>RES</span></h1>
-        <div class="header-sub">WAR REPORT ENGINE · DOMAIN: WAR · PYTHAGOREAN #3 · THE TRIAD</div>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="header-name">ARES</div>
+        <div class="header-sub">He Who Breaks and Binds — The Verb Engine</div>
+        <div class="header-epithet">PYTHAGOREAN TRIAD · DOMAIN: WAR · SVO ARCHITECT</div>
+    </header>
+
+    <!-- STATS -->
+    <div class="stat-bar">
+        <div class="stat">
+            <span class="stat-value" id="pairsAvailable">—</span>
+            <span class="stat-label">Pairs Available</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="tripletsFormed">—</span>
+            <span class="stat-label">Triplets Formed</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="counterPairs">—</span>
+            <span class="stat-label">Counter-Domain</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value" id="dispatched">—</span>
+            <span class="stat-label">Sent to Apollo</span>
+        </div>
     </div>
 
-    <div class="status-bar">
-        <div>Tokens claimed: <span id="tokenCount">—</span></div>
-        <div>Tested: <span id="testedCount">—</span></div>
-        <div>Broken: <span id="brokenCount">—</span></div>
-        <div>Kept: <span id="keptCount">—</span></div>
+    <!-- VERB FIELD -->
+    <div class="verb-field">
+        <div class="verb-field-title">⚔ Active Verb Field</div>
+        <div class="verb-cloud" id="verbCloud"></div>
     </div>
 
-    <div class="vocab-panel">
-        <div class="vocab-title">⚔️ MY WAR VOCABULARY</div>
-        <div class="vocab-cloud" id="vocabCloud">Claim tokens from Hermes to build vocabulary.</div>
-    </div>
-
+    <!-- CONTROLS -->
     <div class="controls">
-        <button id="claimBtn" class="primary">⚔️ Claim War Tokens</button>
-        <button id="testBtn" disabled>⚔️ Stress Test All</button>
-        <button id="dispatchBtn" disabled>📤 Send to Apollo</button>
+        <button class="btn primary" id="fetchBtn">⚔ Fetch Pairs from Aphrodite</button>
+        <button class="btn" id="forgeBtn" disabled>⚒ Forge Triplets</button>
+        <button class="btn gold" id="dispatchBtn" disabled>☉ Send to Apollo</button>
+        <button class="btn" id="clearBtn">✕ Clear Consumed</button>
     </div>
 
-    <div class="reports-grid" id="reportsGrid">
-        <div class="empty-state">Claim war tokens from Hermes, then stress-test.</div>
+    <div class="divider">· · · ⚔ · · ·</div>
+
+    <div class="grid-title">Forged Triplets</div>
+
+    <div class="triplets-grid" id="tripletsGrid">
+        <div class="empty-state">
+            <span class="empty-glyph">⚔</span>
+            <p>The forge is cold.<br>Fetch pairs from Aphrodite, then forge the triplets.</p>
+        </div>
     </div>
 
-    <div class="log" id="log"><div>⚔️ Ares waiting. The Triad hungers for stress.</div></div>
+    <div class="war-log" id="warLog">
+        <div class="log-line">⚔ Ares stirs. The forge awaits Aphrodite's pairs.</div>
+    </div>
 
 </div>
 
@@ -100,225 +525,308 @@ const KAIROS_URL = 'https://kzcucjcyxybypncbdbws.supabase.co';
 const KAIROS_KEY = 'sb_publishable_saeUHGocDah-T2_709M6Fg_g26JtLXw';
 const sb = window.supabase.createClient(KAIROS_URL, KAIROS_KEY);
 
-let myVocab = [];
-let warReports = [];
+let fetchedPairs  = [];
+let forgedTriplets = [];
 
-const WAR_SEEDS = new Set([
-    'war','fight','destroy','shatter','clash','strike','blade','shield','battle',
-    'rage','force','steel','blood','death','kill','crush','burn','break','attack',
-    'defense','army','enemy','rival','conquest','victory','defeat','siege','combat',
-    'assault','invasion','slaughter','carnage','fury','wrath','violence','power'
-]);
+// ── VERB FIELD ─────────────────────────────────────────────────────────────────
+const VERB_FIELD = [
+    // Destructive
+    { verb: 'consumes',   class: 'destructive',   tension: 0.90, rarity: 0.30, weight: 0.70 },
+    { verb: 'shatters',   class: 'destructive',   tension: 1.00, rarity: 0.50, weight: 0.80 },
+    { verb: 'corrupts',   class: 'destructive',   tension: 0.80, rarity: 0.40, weight: 0.60 },
+    { verb: 'devours',    class: 'destructive',   tension: 0.95, rarity: 0.60, weight: 0.90 },
+    { verb: 'breaks',     class: 'destructive',   tension: 0.70, rarity: 0.20, weight: 0.50 },
+    // Constructive
+    { verb: 'builds',     class: 'constructive',  tension: 0.20, rarity: 0.10, weight: 0.40 },
+    { verb: 'heals',      class: 'constructive',  tension: 0.10, rarity: 0.30, weight: 0.60 },
+    { verb: 'binds',      class: 'constructive',  tension: 0.40, rarity: 0.40, weight: 0.70 },
+    { verb: 'cultivates', class: 'constructive',  tension: 0.20, rarity: 0.50, weight: 0.50 },
+    // Transformative
+    { verb: 'mutates',    class: 'transformative', tension: 0.70, rarity: 0.70, weight: 0.60 },
+    { verb: 'awakens',    class: 'transformative', tension: 0.50, rarity: 0.60, weight: 0.80 },
+    { verb: 'evolves',    class: 'transformative', tension: 0.30, rarity: 0.30, weight: 0.50 },
+    { verb: 'transcends', class: 'transformative', tension: 0.40, rarity: 0.80, weight: 0.90 },
+    // Perceptive
+    { verb: 'witnesses',  class: 'perceptive',    tension: 0.10, rarity: 0.60, weight: 0.50 },
+    { verb: 'remembers',  class: 'perceptive',    tension: 0.10, rarity: 0.20, weight: 0.70 },
+    { verb: 'dreams of',  class: 'perceptive',    tension: 0.30, rarity: 0.70, weight: 0.80 },
+    // Recursive
+    { verb: 'mirrors',    class: 'recursive',     tension: 0.30, rarity: 0.50, weight: 0.60 },
+    { verb: 'echoes',     class: 'recursive',     tension: 0.20, rarity: 0.40, weight: 0.70 },
+    { verb: 'contains',   class: 'recursive',     tension: 0.10, rarity: 0.10, weight: 0.40 },
+    // Spiritual
+    { verb: 'haunts',     class: 'spiritual',     tension: 0.70, rarity: 0.80, weight: 0.90 },
+    { verb: 'blesses',    class: 'spiritual',     tension: 0.20, rarity: 0.70, weight: 0.80 },
+    { verb: 'sanctifies', class: 'spiritual',     tension: 0.30, rarity: 0.90, weight: 0.70 },
+];
 
-function log(msg) {
-    const el = document.getElementById('log');
-    el.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + el.innerHTML;
-    while (el.children.length > 30) el.removeChild(el.lastChild);
+// ── VERB SELECTION ─────────────────────────────────────────────────────────────
+// Pair's tension_score biases toward destructive/transformative verbs
+// Pair's affinity_score biases toward constructive/perceptive verbs
+// Counter-domain pairs get an additional tension bias
+function selectVerb(pair) {
+    const pairTension  = pair.tension_score  || 0.5;
+    const pairAffinity = pair.affinity_score || 0.5;
+    const isCounter    = pair.counter_domain_pair || false;
+
+    const scored = VERB_FIELD.map(v => {
+        // Base score from verb's own properties
+        let score = (v.tension * 0.3) + (v.rarity * 0.25) + (v.weight * 0.2);
+
+        // Pair tension pulls toward destructive/transformative
+        if (v.class === 'destructive' || v.class === 'transformative') {
+            score += pairTension * 0.25;
+        }
+
+        // Pair affinity pulls toward constructive/perceptive/recursive
+        if (v.class === 'constructive' || v.class === 'perceptive' || v.class === 'recursive') {
+            score += pairAffinity * 0.2;
+        }
+
+        // Counter-domain pairs strongly favor destructive/spiritual — high-contrast needs powerful verbs
+        if (isCounter && (v.class === 'destructive' || v.class === 'spiritual')) {
+            score += 0.3;
+        }
+
+        // Entropy — prevents always picking the same verb
+        score += Math.random() * 0.15;
+
+        return { ...v, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored[0];
 }
 
-// ════════════════════════════════════════════════
-// CLAIM WAR TOKENS FROM HERMES
-// ════════════════════════════════════════════════
-async function claimTokens() {
-    log('Claiming war tokens from Hermes...');
-    document.getElementById('claimBtn').disabled = true;
-    document.getElementById('claimBtn').innerHTML = '<span class="spin">⟳</span> Claiming...';
+// ── FETCH PAIRS ────────────────────────────────────────────────────────────────
+async function fetchPairs() {
+    setBusy('fetchBtn', '⟳ Fetching...');
+    log('Fetching raw pairs from Aphrodite...');
 
-    const { data: tokens } = await sb.from('concepts')
+    const { data: pairs, error } = await sb
+        .from('pairs')
         .select('*')
-        .eq('domain', 'war')
         .eq('state', 'raw')
-        .eq('band', 'hermes')
-        .order('score', { ascending: false })
-        .limit(40);
+        .eq('consumed', false)
+        .order('created_at', { ascending: false })
+        .limit(60);
 
-    if (!tokens?.length) {
-        log('No war tokens available. Run Hermes → Seed All Domains first.');
-        document.getElementById('claimBtn').disabled = false;
-        document.getElementById('claimBtn').textContent = '⚔️ Claim War Tokens';
+    if (error) {
+        log(`Fetch failed: ${error.message}`, 'err');
+        clearBusy('fetchBtn', '⚔ Fetch Pairs from Aphrodite');
         return;
     }
 
-    const scored = [];
-    for (const t of tokens) {
-        const word = (t.body || '').toLowerCase();
-        const hardcodedBoost = WAR_SEEDS.has(word) ? 0.4 : 0;
-        const seedSimilarity = myVocab.length > 0
-            ? Math.max(...myVocab.map(v => v.word === word ? 0.5 : 0.1))
-            : 0.2;
-        const warScore = hardcodedBoost + seedSimilarity;
-        scored.push({ word, warScore, id: t.id, wordType: t.word_type || '—' });
+    if (!pairs?.length) {
+        log('No raw pairs available. Run Aphrodite first.', 'warn');
+        clearBusy('fetchBtn', '⚔ Fetch Pairs from Aphrodite');
+        return;
     }
 
-    scored.sort((a, b) => b.warScore - a.warScore);
-    const claimed = scored.slice(0, 20);
-
-    for (const c of claimed) {
-        if (!myVocab.find(v => v.word === c.word)) {
-            myVocab.push({ word: c.word, warScore: c.warScore });
-        }
-        await sb.from('concepts').update({ state: 'claimed', realm: 'ares' }).eq('id', c.id);
-    }
-
-    document.getElementById('tokenCount').textContent = tokens.length;
-    document.getElementById('testBtn').disabled = myVocab.length < 3;
-    renderVocab();
-    log(`Claimed ${claimed.length} war tokens. Vocabulary: ${myVocab.length} words.`);
-    document.getElementById('claimBtn').disabled = false;
-    document.getElementById('claimBtn').textContent = '⚔️ Claim War Tokens';
+    fetchedPairs = pairs;
+    document.getElementById('pairsAvailable').textContent = pairs.length;
+    document.getElementById('counterPairs').textContent =
+        pairs.filter(p => p.counter_domain_pair).length || '—';
+    document.getElementById('forgeBtn').disabled = false;
+    log(`${pairs.length} pairs fetched. ${pairs.filter(p => p.counter_domain_pair).length} counter-domain.`, 'success');
+    clearBusy('fetchBtn', '⚔ Fetch Pairs from Aphrodite');
 }
 
-// ════════════════════════════════════════════════
-// STRESS TEST ENGINE
-// ════════════════════════════════════════════════
-function stressTest(item) {
-    const word = item.word || '';
-    const score = item.warScore || 0.3;
-    const tests = [];
+// ── FORGE TRIPLETS ─────────────────────────────────────────────────────────────
+async function forgeTriplets() {
+    if (!fetchedPairs.length) { log('No pairs to forge.', 'warn'); return; }
+    setBusy('forgeBtn', '⟳ Forging...');
+    log('Forging SVO triplets...');
+    forgedTriplets = [];
 
-    tests.push({
-        name: 'War Seed',
-        passed: WAR_SEEDS.has(word),
-        detail: WAR_SEEDS.has(word) ? 'Core war vocabulary' : 'Not a seed word'
-    });
+    for (const pair of fetchedPairs) {
+        const verb = selectVerb(pair);
 
-    tests.push({
-        name: 'Brutality',
-        passed: word.length <= 8,
-        detail: `${word.length} chars — ${word.length <= 8 ? 'Short and brutal' : 'Too long for war'}`
-    });
+        const body = `${pair.token_a_body} ${verb.verb} ${pair.token_b_body}`;
 
-    tests.push({
-        name: 'Score Threshold',
-        passed: score >= 0.25,
-        detail: `Score ${(score*100).toFixed(0)}% — ${score >= 0.25 ? 'PASSES' : 'TOO WEAK'}`
-    });
+        // Scores derived from pair + verb properties
+        const fertilityScore  = Math.round(((pair.affinity_score || 0.5) * 0.5 + verb.weight * 0.5) * 100);
+        const coherenceScore  = Math.round(((1 - (pair.tension_score || 0.5)) * 0.5 + (1 - verb.tension) * 0.5) * 100);
+        const mythogenicScore = Math.round((verb.rarity * 0.5 + verb.weight * 0.3 + Math.random() * 0.2) * 100);
 
-    tests.push({
-        name: 'Hard Consonants',
-        passed: /[kdtbgzrx]/.test(word),
-        detail: /[kdtbgzrx]/.test(word) ? 'Sounds like war' : 'Too soft'
-    });
-
-    tests.push({
-        name: 'Chaos Resistance',
-        passed: Math.random() < (0.4 + score * 0.6),
-        detail: 'Random survival roll'
-    });
-
-    const passedCount = tests.filter(t => t.passed).length;
-    const survived = passedCount >= 3;
-
-    return { ...item, tests, passedCount, survived, verdict: survived ? 'kept' : 'broken', stressScore: Math.round((passedCount / 5) * 100) };
-}
-
-// ════════════════════════════════════════════════
-// TEST ALL
-// ════════════════════════════════════════════════
-async function testAll() {
-    if (myVocab.length < 3) { log('Need at least 3 war words.'); return; }
-    log('Stress-testing war vocabulary...');
-    document.getElementById('testBtn').disabled = true;
-    document.getElementById('testBtn').innerHTML = '<span class="spin">⟳</span> Testing...';
-    warReports = myVocab.map(w => stressTest(w));
-
-    warReports.sort((a, b) => b.stressScore - a.stressScore);
-    const kept = warReports.filter(r => r.survived).length;
-    const broken = warReports.filter(r => !r.survived).length;
-
-    document.getElementById('testedCount').textContent = warReports.length;
-    document.getElementById('brokenCount').textContent = broken;
-    document.getElementById('keptCount').textContent = kept;
-    document.getElementById('dispatchBtn').disabled = kept === 0;
-    renderReports();
-    log(`Tested: ${broken} broken, ${kept} kept.`);
-    document.getElementById('testBtn').disabled = false;
-    document.getElementById('testBtn').textContent = '⚔️ Stress Test All';
-}
-
-// ════════════════════════════════════════════════
-// DISPATCH TO APOLLO
-// ════════════════════════════════════════════════
-async function dispatchToApollo() {
-    const kept = warReports.filter(r => r.survived);
-    if (!kept.length) return;
-    log('Sending war reports to Apollo...');
-    document.getElementById('dispatchBtn').disabled = true;
-    document.getElementById('dispatchBtn').textContent = '📤 Sending...';
-
-    let dispatched = 0;
-    for (const report of kept) {
-        const { error } = await sb.from('ares_dispatch').insert({
-            triplet: report.word,
-            stress_score: report.stressScore,
-            tests_passed: report.passedCount,
-            tests_total: 5,
-            test_results: report.tests,
-            item_type: 'word',
-            consumed: false,
-            created_at: new Date().toISOString()
+        forgedTriplets.push({
+            // DB fields
+            subject:          pair.token_a_body,
+            verb:             verb.verb,
+            object:           pair.token_b_body,
+            body:             body,
+            source:           'ares',
+            source_origin:    `pair:${pair.id}`,
+            fertility_score:  fertilityScore,
+            coherence_score:  coherenceScore,
+            mythogenic_score: mythogenicScore,
+            cultivation_score: 0,
+            archetypal_family: verb.class,
+            state:            'forged',
+            metadata: {
+                verb_class:          verb.class,
+                verb_tension:        verb.tension,
+                verb_rarity:         verb.rarity,
+                pair_affinity:       pair.affinity_score,
+                pair_tension:        pair.tension_score,
+                counter_domain_pair: pair.counter_domain_pair,
+                domain_a:            pair.domain_a,
+                domain_b:            pair.domain_b,
+                visual_mood:         pair.visual_mood,
+            },
+            // Local display only
+            _verb_class:    verb.class,
+            _pair_id:       pair.id,
+            _is_counter:    pair.counter_domain_pair,
         });
-        if (!error) dispatched++;
     }
 
-    document.getElementById('dispatchCount').textContent = dispatched;
-    log(`${dispatched} war reports sent to Apollo.`);
+    document.getElementById('tripletsFormed').textContent = forgedTriplets.length;
     document.getElementById('dispatchBtn').disabled = false;
-    document.getElementById('dispatchBtn').textContent = '📤 Send to Apollo';
+    renderTriplets();
+    log(`${forgedTriplets.length} triplets forged.`, 'success');
+    clearBusy('forgeBtn', '⚒ Forge Triplets');
 }
 
-function renderVocab() {
-    document.getElementById('vocabCloud').innerHTML = myVocab.slice(0, 40).map(v =>
-        `<span class="vocab-chip">${v.word}</span>`
+// ── DISPATCH TO APOLLO ─────────────────────────────────────────────────────────
+async function dispatchToApollo() {
+    if (!forgedTriplets.length) return;
+    setBusy('dispatchBtn', '⟳ Sending...');
+    log('Writing triplets to svo_triplets, marking pairs consumed...');
+
+    // Strip local-only display fields before insert
+    const toInsert = forgedTriplets.map(({ _verb_class, _pair_id, _is_counter, ...t }) => t);
+
+    const CHUNK = 50;
+    let written = 0;
+    const errors = [];
+
+    for (let i = 0; i < toInsert.length; i += CHUNK) {
+        const { error } = await sb.from('svo_triplets').insert(toInsert.slice(i, i + CHUNK));
+        if (error) errors.push(error.message);
+        else written += Math.min(CHUNK, toInsert.length - i);
+    }
+
+    // Mark source pairs consumed
+    const pairIds = [...new Set(forgedTriplets.map(t => t._pair_id || null).filter(Boolean))];
+    if (pairIds.length) {
+        await sb.from('pairs')
+            .update({ consumed: true, state: 'forged' })
+            .in('id', pairIds);
+    }
+
+    document.getElementById('dispatched').textContent = written;
+
+    if (errors.length) {
+        log(`${written} written. Errors: ${errors.join('; ')}`, 'warn');
+    } else {
+        log(`${written} triplets written to svo_triplets. ${pairIds.length} pairs marked consumed.`, 'success');
+    }
+
+    forgedTriplets = [];
+    fetchedPairs   = [];
+    renderTriplets();
+    document.getElementById('forgeBtn').disabled   = true;
+    document.getElementById('dispatchBtn').disabled = true;
+    clearBusy('dispatchBtn', '☉ Send to Apollo');
+}
+
+// ── CLEAR CONSUMED ─────────────────────────────────────────────────────────────
+async function clearConsumed() {
+    const { error } = await sb.from('pairs').delete().eq('consumed', true);
+    if (error) { log(`Clear failed: ${error.message}`, 'err'); return; }
+    log('Consumed pairs cleared.', 'success');
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────────────────
+function renderVerbCloud() {
+    document.getElementById('verbCloud').innerHTML = VERB_FIELD.map(v =>
+        `<span class="verb-chip ${v.class}" title="tension:${v.tension} rarity:${v.rarity} weight:${v.weight}">${v.verb}</span>`
     ).join('');
 }
 
-function renderReports() {
-    const grid = document.getElementById('reportsGrid');
-    if (!warReports.length) {
-        grid.innerHTML = '<div class="empty-state">Claim war tokens and stress-test.</div>';
+function renderTriplets() {
+    const grid = document.getElementById('tripletsGrid');
+
+    if (!forgedTriplets.length) {
+        grid.innerHTML = `
+            <div class="empty-state">
+                <span class="empty-glyph">⚔</span>
+                <p>The forge is cold.<br>Fetch pairs from Aphrodite, then forge the triplets.</p>
+            </div>`;
         return;
     }
-    grid.innerHTML = warReports.map(r => `
-        <div class="report-card ${r.verdict}">
-            <div class="report-head">
-                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--muted);">word</span>
-                <span class="report-verdict ${r.survived ? 'verdict-kept' : 'verdict-broken'}">${r.survived ? 'KEPT' : 'BROKEN'}</span>
+
+    grid.innerHTML = forgedTriplets.map((t, i) => {
+        const cls = t._verb_class || 'destructive';
+        const tensionColor = t.metadata.pair_tension >= 0.6 ? 'var(--gold)' : 'var(--muted)';
+        const delay = `animation-delay:${i * 0.04}s`;
+
+        return `
+        <div class="triplet-card ${cls}" style="${delay}">
+            <div class="triplet-svo">
+                <span class="svo-subject">${esc(t.subject)}</span>
+                <span class="svo-verb">${esc(t.verb)}</span>
+                <span class="svo-object">${esc(t.object)}</span>
             </div>
-            <div class="report-triplet">${esc(r.word)}</div>
-            <div class="report-tests">
-                ${r.tests.map(t => `${t.passed ? '<span class="pass">✓</span>' : '<span class="fail">✗</span>'} ${t.name}: ${t.detail}`).join('<br>')}
+            <div class="triplet-meta">
+                <span class="meta-badge ${cls}">${cls}</span>
+                ${t._is_counter ? '<span class="counter-tag">⚡ counter</span>' : ''}
+                <div class="meta-scores">
+                    <div class="meta-score-item">
+                        <span class="meta-score-value" style="color:var(--ares-bright)">${t.fertility_score}</span>
+                        <span class="meta-score-label">Fertility</span>
+                    </div>
+                    <div class="meta-score-item">
+                        <span class="meta-score-value" style="color:var(--kept)">${t.coherence_score}</span>
+                        <span class="meta-score-label">Coherence</span>
+                    </div>
+                    <div class="meta-score-item">
+                        <span class="meta-score-value" style="color:${tensionColor}">${t.mythogenic_score}</span>
+                        <span class="meta-score-label">Mythogenic</span>
+                    </div>
+                </div>
             </div>
-            <div style="display:flex;justify-content:space-between;margin-top:0.5rem;">
-                <span style="font-family:var(--font-mono);font-size:0.5rem;color:var(--muted);">${r.passedCount}/5</span>
-                <span class="report-stress">${r.stressScore}</span>
-            </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
-function esc(s) { return String(s||'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]); }
-
-async function archiveSelf() {
-    try {
-        const html = document.documentElement.outerHTML;
-        await sb.from('html').upsert({
-            filename: 'ares.html', title: '⚔️ Ares · War Report Engine', type: 'olympian',
-            content: html, description: 'Claims war tokens from Hermes by domain, stress-tests, dispatches survivors to Apollo',
-            reads_from: ['concepts'], writes_to: ['ares_dispatch'],
-            models_used: [],
-            url: window.location.href, updated_at: new Date().toISOString()
-        }, { onConflict: 'filename' });
-    } catch {}
+// ── UTILITIES ──────────────────────────────────────────────────────────────────
+function log(msg, type = '') {
+    const el = document.getElementById('warLog');
+    const div = document.createElement('div');
+    div.className = `log-line ${type}`;
+    div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    el.prepend(div);
+    while (el.children.length > 40) el.removeChild(el.lastChild);
 }
 
+function setBusy(id, label) {
+    const btn = document.getElementById(id);
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spin">⟳</span> ${label}`;
+}
+
+function clearBusy(id, label) {
+    const btn = document.getElementById(id);
+    btn.disabled = false;
+    btn.textContent = label;
+}
+
+function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
 function init() {
-    document.getElementById('claimBtn').onclick = claimTokens;
-    document.getElementById('testBtn').onclick = testAll;
+    document.getElementById('fetchBtn').onclick    = fetchPairs;
+    document.getElementById('forgeBtn').onclick    = forgeTriplets;
     document.getElementById('dispatchBtn').onclick = dispatchToApollo;
-    setTimeout(archiveSelf, 3000);
-    log('⚔️ Ares — Pythagorean #3. Claims war by domain.');
+    document.getElementById('clearBtn').onclick    = clearConsumed;
+    renderVerbCloud();
 }
+
 init();
 </script>
 </body>
