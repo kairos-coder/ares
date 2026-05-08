@@ -3,270 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARES · Verb Engine</title>
+    <title>ARES · The Verb Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@300;400;500&display=swap');
 
         :root {
-            --obsidian: #0f0b0b;
-            --forge:    #1a1010;
-            --iron:     #221414;
-            --blood:    #2e1010;
-            --border:   #3a1a1a;
+            --obsidian: #0a0606;
+            --forge:    #1a0f0f;
+            --blood:    #3a1a1a;
             --ares:     #c0382a;
-            --ares-bright: #e04030;
-            --steel:    #b06050;
-            --ember:    #c8603a;
-            --gold:     #c8943a;
+            --ares-bright: #e84a38;
+            --ember:    #e87850;
+            --gold:     #d4a850;
             --ivory:    #e8d8d0;
-            --muted:    #786060;
-            --font-display: 'Cinzel', serif;
-            --font-body: 'Crimson Pro', serif;
-            --font-mono: 'JetBrains Mono', monospace;
+            --muted:    #8a7060;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             background: var(--obsidian);
-            font-family: var(--font-body);
             color: var(--ivory);
+            font-family: 'Crimson Pro', serif;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 3rem 2rem;
-        }
-
-        .header {
+        .hero {
+            height: 420px;
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.75)), url('assets/ares-hero.jpg') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            margin-bottom: 2.5rem;
+            position: relative;
         }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--ares), var(--ember), var(--ares), transparent);
+        }
+
         .header-name {
-            font-family: var(--font-display);
-            font-size: clamp(2.8rem, 6vw, 4rem);
+            font-family: 'Cinzel', serif;
+            font-size: clamp(3rem, 8vw, 5.5rem);
             font-weight: 900;
-            letter-spacing: 10px;
+            letter-spacing: 12px;
             color: var(--ares-bright);
-            text-shadow: 0 0 40px rgba(192,56,42,0.6);
+            text-shadow: 0 0 60px rgba(232,74,56,0.8);
         }
-        .header-sub {
-            font-style: italic;
-            color: var(--ember);
-            letter-spacing: 4px;
-            margin-top: 0.5rem;
-        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 2rem; }
 
         .stat-bar {
             display: flex;
             justify-content: center;
-            gap: 2.5rem;
-            margin: 2rem 0;
+            gap: 3rem;
+            margin: 2.5rem 0;
             flex-wrap: wrap;
         }
-        .stat-value { font-family: var(--font-display); font-size: 1.8rem; color: var(--ares-bright); }
-        .stat-label { font-family: var(--font-mono); font-size: 0.45rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+        .stat-value { font-family: 'Cinzel', serif; font-size: 2.2rem; color: var(--ares-bright); }
+        .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.48rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
 
         .controls {
             text-align: center;
-            margin: 2rem 0;
+            margin: 2.5rem 0;
         }
         .btn {
-            font-family: var(--font-mono);
-            padding: 0.9rem 2rem;
-            margin: 0 0.5rem;
-            font-size: 0.65rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: var(--forge);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            padding: 1rem 2.2rem;
+            margin: 0 0.6rem;
+            background: transparent;
             color: var(--ivory);
-            border: 1px solid var(--ares);
+            border: 2px solid var(--ares);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s;
         }
-        .btn:hover { background: var(--ares); box-shadow: 0 0 20px rgba(192,56,42,0.4); }
+        .btn:hover {
+            background: var(--ares);
+            color: white;
+            box-shadow: 0 0 30px rgba(192,56,42,0.5);
+        }
 
         .triplets-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.2rem;
             margin-top: 2rem;
         }
         .triplet-card {
-            background: linear-gradient(160deg, var(--forge), var(--iron));
-            border: 1px solid var(--border);
-            padding: 1.2rem;
+            background: linear-gradient(160deg, var(--forge), #1f1414);
+            border: 1px solid #4a2a2a;
+            padding: 1.4rem;
         }
-        .svo { font-size: 1.1rem; margin-bottom: 0.8rem; }
+        .svo {
+            font-size: 1.25rem;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
         .svo-verb { color: var(--ares-bright); font-weight: bold; }
 
         .log {
             margin-top: 2rem;
-            background: rgba(0,0,0,0.4);
+            background: rgba(10,6,6,0.9);
+            border: 1px solid #3a1a1a;
             padding: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.5rem;
-            max-height: 180px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.52rem;
+            max-height: 220px;
             overflow-y: auto;
+            color: var(--muted);
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <header class="header">
-        <div class="header-name">ARES</div>
-        <div class="header-sub">THE VERB ENGINE • FORGER OF SVO TRIPLETS</div>
-    </header>
 
-    <div class="stat-bar">
+    <!-- HERO -->
+    <div class="hero">
         <div>
-            <span class="stat-value" id="pairsCount">0</span>
-            <div class="stat-label">Pairs Ready</div>
-        </div>
-        <div>
-            <span class="stat-value" id="tripletsCount">0</span>
-            <div class="stat-label">Triplets Forged</div>
+            <div class="header-name">ARES</div>
+            <p style="margin-top:1rem; font-size:1.1rem; letter-spacing:4px; color:#e87850;">THE VERB ENGINE • FORGER OF TRIPLETS</p>
         </div>
     </div>
 
-    <div class="controls">
-        <button class="btn" id="fetchBtn">⚔ FETCH PAIRS FROM APHRODITE</button>
-        <button class="btn" id="forgeBtn" disabled>⚒ FORGE SVO TRIPLETS</button>
+    <div class="container">
+
+        <div class="stat-bar">
+            <div>
+                <span class="stat-value" id="pairsCount">0</span>
+                <div class="stat-label">Pairs Ready</div>
+            </div>
+            <div>
+                <span class="stat-value" id="tripletsCount">0</span>
+                <div class="stat-label">Triplets Forged</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="fetchBtn">⚔ CALL TO WAR — FETCH PAIRS</button>
+        </div>
+
+        <h3 style="text-align:center; margin:2rem 0 1rem; color:var(--ember); font-family:'Cinzel',serif; letter-spacing:3px;">RECENTLY FORGED TRIPLETS</h3>
+        <div class="triplets-grid" id="tripletsGrid">
+            <!-- Populated by JS -->
+        </div>
+
+        <div class="log" id="log">Ares stirs in the forge...</div>
     </div>
-
-    <div class="triplets-grid" id="tripletsGrid"></div>
-
-    <div class="log" id="log">Ares awaits the call to war...</div>
-</div>
 
 <script type="module">
+const EDGE_BASE = 'https://kzcucjcyxybypncbdbws.supabase.co/functions/v1';
 const sb = window.supabase.createClient(
     'https://kzcucjcyxybypncbdbws.supabase.co',
     'sb_publishable_saeUHGocDah-T2_709M6Fg_g26JtLXw'
 );
 
-let currentPairs = [];
-
-// Verb Field (kept from your excellent original)
-const VERB_FIELD = [ /* ... same as your original VERB_FIELD ... */ ];
-
-function selectVerb(pair) {
-    // Your original smart selection logic (kept intact)
-    const pairTension = pair.tension_score || 0.5;
-    const isCounter = pair.counter_domain_pair || false;
-
-    const scored = VERB_FIELD.map(v => {
-        let score = (v.tension * 0.35) + (v.rarity * 0.3) + (v.weight * 0.25);
-        if (v.class === 'destructive' || v.class === 'transformative') score += pairTension * 0.3;
-        if (isCounter && (v.class === 'destructive' || v.class === 'spiritual')) score += 0.4;
-        score += Math.random() * 0.15;
-        return { ...v, score };
-    });
-
-    scored.sort((a, b) => b.score - a.score);
-    return scored[0];
-}
-
-async function fetchPairs() {
+async function callAres() {
     const btn = document.getElementById('fetchBtn');
     btn.disabled = true;
-    btn.textContent = "FETCHING...";
+    btn.textContent = "⚔ FORGING IN PROGRESS...";
 
+    log("Calling Ares Edge Function...", "normal");
+
+    try {
+        const res = await fetch(`${EDGE_BASE}/ares-transform`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ limit: 120 })
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            log(`✓ Forged ${result.triplets_forged} triplets from ${result.pairs_read} pairs`, "success");
+            if (result.verb_classes_used?.length) {
+                log(`Verbs used: ${result.verb_classes_used.join(' • ')}`, "success");
+            }
+        } else {
+            log(`⚠ ${result.errors?.[0] || 'Unknown error'}`, "warn");
+        }
+
+        await loadRecentTriplets();
+
+    } catch (err) {
+        log(`Network Error: ${err.message}`, "err");
+        console.error(err);
+    }
+
+    btn.disabled = false;
+    btn.textContent = "⚔ CALL TO WAR — FETCH PAIRS";
+}
+
+async function loadRecentTriplets() {
     const { data, error } = await sb
-        .from('pairs')
+        .from('svo_triplets')
         .select('*')
-        .eq('state', 'raw')
-        .eq('consumed', false)
-        .limit(80);
+        .eq('source', 'ares')
+        .order('created_at', { ascending: false })
+        .limit(15);
 
     if (error) {
-        log(`Error: ${error.message}`, 'err');
-        btn.disabled = false;
-        btn.textContent = "⚔ FETCH PAIRS FROM APHRODITE";
+        console.error(error);
         return;
     }
 
-    currentPairs = data || [];
-    document.getElementById('pairsCount').textContent = currentPairs.length;
-    document.getElementById('forgeBtn').disabled = false;
-    
-    log(`Fetched ${currentPairs.length} raw pairs from Aphrodite`, 'success');
-    btn.disabled = false;
-    btn.textContent = "⚔ FETCH PAIRS FROM APHRODITE";
-}
+    const grid = document.getElementById('tripletsGrid');
+    document.getElementById('tripletsCount').textContent = data?.length || 0;
 
-async function forgeTriplets() {
-    if (!currentPairs.length) return log("No pairs available", 'warn');
-
-    const btn = document.getElementById('forgeBtn');
-    btn.disabled = true;
-    btn.textContent = "FORGING...";
-
-    const toInsert = currentPairs.map(pair => {
-        const verb = selectVerb(pair);
-        const body = `${pair.token_a_body} ${verb.verb} ${pair.token_b_body}`;
-
-        return {
-            subject: pair.token_a_body,
-            verb: verb.verb,
-            object: pair.token_b_body,
-            body: body,
-            source: 'ares',
-            source_origin: `pair:${pair.id}`,
-            fertility_score: Math.round(((pair.affinity_score || 0.5) + verb.weight) * 50),
-            coherence_score: Math.round((1 - (pair.tension_score || 0.5)) * 80 + 20),
-            mythogenic_score: Math.round(verb.rarity * 90 + 10),
-            archetypal_family: verb.class,
-            state: 'raw',
-            metadata: { verb_class: verb.class, pair_id: pair.id }
-        };
-    });
-
-    const { error } = await sb.from('svo_triplets').insert(toInsert);
-
-    if (error) {
-        log(`Insert failed: ${error.message}`, 'err');
-    } else {
-        // Mark pairs as consumed
-        const pairIds = currentPairs.map(p => p.id);
-        await sb.from('pairs').update({ consumed: true, state: 'forged' }).in('id', pairIds);
-
-        log(`Successfully forged and inserted ${toInsert.length} SVO triplets`, 'success');
-        renderTriplets(toInsert);
+    if (!data?.length) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:3rem; color:#666;">No triplets forged yet.</div>`;
+        return;
     }
 
-    btn.disabled = false;
-    btn.textContent = "⚒ FORGE SVO TRIPLETS";
-    currentPairs = [];
-    document.getElementById('pairsCount').textContent = 0;
-}
-
-function renderTriplets(triplets) {
-    const grid = document.getElementById('tripletsGrid');
-    grid.innerHTML = triplets.map(t => `
+    grid.innerHTML = data.map(t => `
         <div class="triplet-card">
             <div class="svo">
-                <span>${t.subject}</span> 
-                <span class="svo-verb">${t.verb}</span> 
-                <span>${t.object}</span>
+                \( {t.subject} <span class="svo-verb"> \){t.verb}</span> ${t.object}
             </div>
-            <small style="color:#888">\( {t.archetypal_family} • F: \){t.fertility_score} C:\( {t.coherence_score} M: \){t.mythogenic_score}</small>
+            <small style="color:#aaa">
+                ${t.archetypal_family} • 
+                F:\( {t.fertility_score} C: \){t.coherence_score} M:${t.mythogenic_score}
+            </small>
         </div>
     `).join('');
 }
 
-function log(msg, type = '') {
-    const el = document.getElementById('log');
+function log(msg, type = "normal") {
+    const logEl = document.getElementById('log');
+    const colors = { success: '#9f8', warn: '#fb8', err: '#f66', normal: '#aaa' };
     const time = new Date().toLocaleTimeString();
-    el.innerHTML = `<span style="color:\( {type==='success'?'#8f8': type==='err'?'#f66':'#cc8'}">[ \){time}] ${msg}</span><br>` + el.innerHTML;
+    logEl.innerHTML = `<span style="color:\( {colors[type]}">[ \){time}] ${msg}</span><br>` + logEl.innerHTML;
+    
+    if (logEl.children.length > 30) logEl.removeChild(logEl.lastChild);
 }
 
 // Init
-document.getElementById('fetchBtn').onclick = fetchPairs;
-document.getElementById('forgeBtn').onclick = forgeTriplets;
+document.getElementById('fetchBtn').onclick = callAres;
+loadRecentTriplets();           // Load existing triplets on page load
+setInterval(loadRecentTriplets, 15000); // Refresh every 15s
 </script>
 </body>
 </html>
