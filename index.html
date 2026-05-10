@@ -345,17 +345,15 @@ async function forgeTriplet(index) {
         tension = Math.min(1, tension + 0.2);
     }
 
-    forgedTriplets.push({
-        subject: pair.token_a_body,
-        verb: verb.toLowerCase(),
-        object: pair.token_b_body,
-        tension: parseFloat(tension.toFixed(4)),
-        domain: 'war',
-        domain_a: pair.domain_a,
-        domain_b: pair.domain_b,
-        pair_id: pair.id,
-        created_at: new Date().toISOString()
-    });
+// NEW (matches actual schema):
+forgedTriplets.push({
+  subject: pair.token_a_body,
+  verb: verb.toLowerCase(),
+  object: pair.token_b_body,
+  source: 'ares-forge',
+  state: 'raw',
+  created_at: new Date().toISOString()
+});
 
     // Remove from queue
     pairsQueue.splice(index, 1);
